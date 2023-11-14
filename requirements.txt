@@ -1,1 +1,7 @@
 elasticsearch
+fastapi
+insightface
+onnxruntime
+uvicorn
+opencv_python
+opencv_python_headless
