@@ -6,3 +6,4 @@ uvicorn
 opencv_python
 opencv_python_headless
 configparser
+streamlit
