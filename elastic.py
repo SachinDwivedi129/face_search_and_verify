@@ -19,10 +19,10 @@ def create_elasticsearch_connection():
 
     # Create an Elasticsearch client with basic authentication and SSL
     es = Elasticsearch(
-        [f'http://{es_host}:{es_port}'],
+        [f'https://{es_host}:{es_port}'],
         basic_auth=(es_user, es_password),
         verify_certs=es_use_ssl,
-        #ca_certs=es_ca_cert  # Provide the path to your certificate file
+        ca_certs=es_ca_cert  # Provide the path to your certificate file
     )
 
     try:
@@ -92,3 +92,5 @@ def search_elastic(target_embeddings:list, similarity_threshold: float=1.5):
         print(f"Exception as {e}")
         # log exception
         return "Error occured. Check logs"
+if __name__="__main__":
+    print(create_elasticsearch_connection)
