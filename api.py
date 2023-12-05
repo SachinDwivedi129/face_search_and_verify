@@ -1,37 +1,26 @@
-from fastapi import FastAPI, Body, Header , HTTPException
-import base64
+from fastapi import FastAPI, Body, Header 
 from fastapi.responses import JSONResponse
 import uvicorn
-from insightface.app import FaceAnalysis
-import cv2
-import numpy as np
 import gc
 from embeddings import search
-# from image_inap import Image_Moderation
-# from PIL import Image
+#local import 
+from utility import check_credentials
 
+
+#app initialize
 app = FastAPI()
 
+#response dict
 response_dict={
     "Response":"",
     "Message":""
 }
-user="Event@kochi"
-password="RandomGeneratedPassword@kochi"
 
-@app.post("/face_verify")
+
+@app.post("/face_search")
 async def extract_text_from_pdf(image_data: dict = Body(...), userid: str = Header(None), clientsecretkey: str = Header(None)):
     try:
-        if userid is not None and clientsecretkey is not None:
-            hdruserid = userid
-            hdrclientsecretkey = clientsecretkey
-        else:
-            response_dict["Response"]="Try again"
-            response_dict["Message"]="Failed. Invalid Header"
-            gc.collect()
-            return JSONResponse(response_dict)
-        
-        if hdruserid==user and hdrclientsecretkey==password:
+        if check_credentials(userid,clientsecretkey):
 
             image_name = image_data.get('Image_Name', None)
             image_base=image_data.get('Image_Base64', None)
@@ -40,8 +29,7 @@ async def extract_text_from_pdf(image_data: dict = Body(...), userid: str = Head
 
             response_dict["Response"]=output
             response_dict["Message"]="SUCCESS"
-            return JSONResponse(output)
-            
+            return JSONResponse(output) 
         
         else:
             response_dict["Response"]="Try again"
@@ -49,7 +37,7 @@ async def extract_text_from_pdf(image_data: dict = Body(...), userid: str = Head
             gc.collect()
             return JSONResponse(response_dict)
     except Exception as e:
-        #raise HTTPException(status_code=500, detail=str(e))
+        
         response_dict["Response"]="Something went Wrong"
         response_dict["Message"]="Failed . Exception occured"
         gc.collect()
