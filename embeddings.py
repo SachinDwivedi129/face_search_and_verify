@@ -102,7 +102,7 @@ def single_embedding_creation(img_bs64:str, image_name:str):
 
 # search functionality
 
-def search(bs64:str):
+def search(bs64:str, search_type:str ="face_search"):
     
     # doing pre processing
     denoised_image= image_pre_process(bs64=bs64, image_path=False)
@@ -112,10 +112,7 @@ def search(bs64:str):
     # converting to list to search in elastic
     embeddings=target_embeddings[0]["embedding"].tolist()
 
-    # threshold 
-    threshold = float(config.get("image","threshold"))
-
-    output=search_elastic(target_embeddings=embeddings, similarity_threshold=threshold)
+    output=search_elastic(target_embeddings=embeddings, search_type=search_type)
 
     return output
 

@@ -19,10 +19,10 @@ def create_elasticsearch_connection():
 
     # Create an Elasticsearch client with basic authentication and SSL
     es = Elasticsearch(
-        [f'https://{es_host}:{es_port}'],
+        [f'http://{es_host}:{es_port}'],
         basic_auth=(es_user, es_password),
         verify_certs=es_use_ssl,
-        ca_certs=es_ca_cert  # Provide the path to your certificate file
+        #ca_certs=es_ca_cert  # Provide the path to your certificate file
     )
 
     try:
@@ -38,7 +38,7 @@ def create_elasticsearch_connection():
 
 
 # index creation
-def create_index(index_name:str , mapping: dict):
+def create_index(index_name:str, mapping: dict ): #
     es=create_elasticsearch_connection()
     """
     index_name="face_search"
@@ -49,48 +49,91 @@ def create_index(index_name:str , mapping: dict):
                 "type": "dense_vector",
                 "dims": 512  # The dimension of your face embeddings
             },
-            "image_path": {
+            "image_name": {
                 "type": "keyword"
             }
         }
     }
     """
-    return es.indices.create(index=index_name, body={"mappings": mapping})
+    response= es.indices.create(index=index_name, body={"mappings": mapping})
+    es.close()
+    return response
 
 # index data elasticsearxch index    
 def index_data(data:dict , index_name:str):
     es=create_elasticsearch_connection()
-    return es.index(index=index_name, body=data)
+    response=es.index(index=index_name, body=data)
+    es.close()
+    return response
     
 
 # elastic search with cosine similarity
 
-def search_elastic(target_embeddings:list, similarity_threshold: float=1.5):
+def search_elastic(target_embeddings:list, search_type:str ="face_search"):
     try:
         es= create_elasticsearch_connection()
-        search_query = {
-            "query": {
-                "script_score": {
-                    "query": {"match_all": {}},
-                    "script": {
-                        "source": "cosineSimilarity(params.query_vector, 'embeddings') + 1.0",
-                        "params": {"query_vector": target_embeddings}
-                    }
-                }
-            },
-            "min_score":similarity_threshold
-        }
-
-        # Execute the search
-        response = es.search(index="face_search", body=search_query, size=1000)
         
-        # Retrieve the matching image path
-        matching_image_path = [hit['_source']['image_path'] for hit in response['hits']['hits']]
+        if search_type=='face_search':
+             # parameters
+            threshold = float(config.get("face_search","threshold"))
+            size = int(config.get("face_search","size"))
+            index_name= str(config.get("face_search","index_name"))
 
-        return matching_image_path
+            search_query = {
+                "query": {
+                    "script_score": {
+                        "query": {"match_all": {}},
+                        "script": {
+                            "source": "cosineSimilarity(params.query_vector, 'embeddings') + 1.0",
+                            "params": {"query_vector": target_embeddings}
+                        }
+                    }
+                },
+                "min_score":threshold
+            }
+
+            # Execute the search
+            response = es.search(index=index_name, body=search_query, size=size)
+            
+            # Retrieve the matching image path
+            matching_image_path = [hit['_source']['image_path'] for hit in response['hits']['hits']]
+            
+            es.close()
+            return matching_image_path
+        
+        elif search_type=="face_verify":
+            # parameters
+            threshold = float(config.get("face_verify","threshold"))
+            size = int(config.get("face_verify","size"))
+            index_name= str(config.get("face_verify","index_name"))
+
+            search_query = {
+                "query": {
+                    "script_score": {
+                        "query": {"match_all": {}},
+                        "script": {
+                            "source": "cosineSimilarity(params.query_vector, 'embeddings') + 1.0",
+                            "params": {"query_vector": target_embeddings}
+                        }
+                    }
+                },
+                "min_score":threshold
+            }
+
+            # Execute the search
+            response = es.search(index=index_name, body=search_query, size=size)
+            
+            # Retrieve the matching image path
+            matching_image_name = [hit['_source']['image_name'] for hit in response['hits']['hits']]
+            es.close()
+            return matching_image_name
+
     except Exception as e:
         print(f"Exception as {e}")
         # log exception
         return "Error occured. Check logs"
-if __name__="__main__":
-    print(create_elasticsearch_connection)
+
+
+
+if __name__=="__main__":
+    print(create_index("face_verify"))
