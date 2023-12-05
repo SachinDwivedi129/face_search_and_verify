@@ -2,6 +2,7 @@ test.ipynb
 http_ca.crt
 .faceEnv
 .faceEnv/
+config.ini
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
