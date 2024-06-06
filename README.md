@@ -11,7 +11,6 @@ This Python application demonstrates how to store face embeddings in Elasticsear
     pip install -r requirements.txt
     ```
 
-   Make sure to replace `requirements.txt` with the actual file containing your Python dependencies.
 
 2. Elasticsearch Setup:
 
