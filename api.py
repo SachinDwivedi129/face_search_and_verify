@@ -20,7 +20,7 @@ user="Event@kochi"
 password="RandomGeneratedPassword@kochi"
 
 @app.post("/face_verify")
-async def extract_text_from_pdf(image_data: dict = Body(...), userid: str = Header(None), clientsecretkey: str = Header(None)):
+async def face_verify_endpoint(image_data: dict = Body(...), userid: str = Header(None), clientsecretkey: str = Header(None)):
     try:
         if userid is not None and clientsecretkey is not None:
             hdruserid = userid
